@@ -6,12 +6,12 @@ struct GhosttyLayoutCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "ghostty-layout",
         abstract: "Ghosttyターミナルの画面分割をコマンドラインから実行",
-        version: "0.2.0",
+        version: "0.3.0",
         subcommands: [],
         defaultSubcommand: nil
     )
 
-    @Argument(help: "レイアウト: h(水平2分割), v(垂直2分割), 4(2x2), 6(2x3), 8(4x2)")
+    @Argument(help: "レイアウト: h, v, 4, 6, 8, 9 または CxR形式（例: 2x3, 3x2）")
     var layout: String?
 
     @Flag(name: .shortAndLong, help: "利用可能なレイアウト一覧を表示")
@@ -51,7 +51,7 @@ struct GhosttyLayoutCommand: ParsableCommand {
         }
 
         // レイアウトのパース
-        guard let selectedLayout = Layout(rawValue: layoutArg) else {
+        guard let gridLayout = GridLayout.parse(layoutArg) else {
             print("エラー: 不明なレイアウト '\(layoutArg)'")
             print("")
             printLayoutList()
@@ -85,9 +85,9 @@ struct GhosttyLayoutCommand: ParsableCommand {
         usleep(100_000) // 100ms
 
         // レイアウト実行
-        selectedLayout.execute()
+        gridLayout.execute()
 
-        print("✓ \(selectedLayout.description)を適用しました")
+        print("✓ \(gridLayout.description)を適用しました")
     }
 
     /// 設定ファイルを再生成
@@ -146,14 +146,24 @@ struct GhosttyLayoutCommand: ParsableCommand {
 
     private func printLayoutList() {
         print("利用可能なレイアウト:")
-        print("  h  - 水平2分割 (左右)")
-        print("  v  - 垂直2分割 (上下)")
-        print("  4  - 4分割 (2x2)")
-        print("  6  - 6分割 (2x3)")
-        print("  8  - 8分割 (4x2)")
+        print("")
+        print("  ショートカット:")
+        print("    h     横2列 (2x1)")
+        print("    v     縦2段 (1x2)")
+        print("    4     4分割 (2x2)")
+        print("    6     6分割 (2x3)")
+        print("    8     8分割 (4x2)")
+        print("    9     9分割 (3x3)")
+        print("")
+        print("  グリッド記法 (CxR):")
+        print("    2x3   2列×3行")
+        print("    3x2   3列×2行")
+        print("    4x2   4列×2行")
+        print("    ...   任意の組み合わせ（1-8列 × 1-8行）")
         print("")
         print("使い方:")
         print("  ghostty-layout <layout>")
+        print("  ghostty-layout 2x3")
         print("  ghostty-layout --list")
         print("  ghostty-layout --show-config")
         print("  ghostty-layout --init-config")

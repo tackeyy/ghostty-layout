@@ -1,152 +1,199 @@
 import Foundation
 
-/// レイアウトの種類
-enum Layout: String, CaseIterable {
-    case horizontal = "h"
-    case vertical = "v"
-    case grid4 = "4"
-    case grid6 = "6"
-    case grid8 = "8"
+/// グリッドレイアウト（列×行）
+struct GridLayout {
+    let columns: Int
+    let rows: Int
 
+    /// 文字列からパース（例: "2x3", "3x2"）
+    static func parse(_ input: String) -> GridLayout? {
+        // グリッド記法: CxR
+        let parts = input.lowercased().split(separator: "x")
+        if parts.count == 2,
+           let cols = Int(parts[0]),
+           let rows = Int(parts[1]),
+           cols >= 1 && cols <= 8,
+           rows >= 1 && rows <= 8 {
+            return GridLayout(columns: cols, rows: rows)
+        }
+
+        // エイリアス
+        switch input.lowercased() {
+        case "h":
+            return GridLayout(columns: 2, rows: 1)
+        case "v":
+            return GridLayout(columns: 1, rows: 2)
+        case "4":
+            return GridLayout(columns: 2, rows: 2)
+        case "6":
+            return GridLayout(columns: 2, rows: 3)
+        case "8":
+            return GridLayout(columns: 4, rows: 2)
+        case "9":
+            return GridLayout(columns: 3, rows: 3)
+        default:
+            return nil
+        }
+    }
+
+    /// 説明文字列
     var description: String {
-        switch self {
-        case .horizontal: return "水平2分割"
-        case .vertical: return "垂直2分割"
-        case .grid4: return "4分割 (2x2)"
-        case .grid6: return "6分割 (2x3)"
-        case .grid8: return "8分割 (4x2)"
+        let total = columns * rows
+        if columns == 1 && rows == 1 {
+            return "分割なし"
+        } else if columns == 1 {
+            return "縦\(rows)段"
+        } else if rows == 1 {
+            return "横\(columns)列"
+        } else {
+            return "\(total)分割 (\(columns)x\(rows))"
         }
     }
 
     /// レイアウトを実行
     func execute() {
-        switch self {
-        case .horizontal:
-            executeHorizontal()
-        case .vertical:
-            executeVertical()
-        case .grid4:
-            executeGrid4()
-        case .grid6:
-            executeGrid6()
-        case .grid8:
-            executeGrid8()
+        // 1x1 は何もしない
+        if columns == 1 && rows == 1 {
+            return
+        }
+
+        // 縦のみの分割（1列×N行）
+        if columns == 1 {
+            executeVerticalOnly(rows: rows)
+            return
+        }
+
+        // 横のみの分割（N列×1行）
+        if rows == 1 {
+            executeHorizontalOnly(columns: columns)
+            return
+        }
+
+        // グリッド分割（C列×R行）
+        executeGrid(columns: columns, rows: rows)
+    }
+
+    /// 縦のみの分割（1列×N行）
+    private func executeVerticalOnly(rows: Int) {
+        for _ in 1..<rows {
+            KeySender.splitVertical()
+            KeySender.wait()
         }
     }
 
-    /// 水平2分割: Cmd+D
-    private func executeHorizontal() {
-        KeySender.splitHorizontal()
+    /// 横のみの分割（N列×1行）
+    private func executeHorizontalOnly(columns: Int) {
+        for _ in 1..<columns {
+            KeySender.splitHorizontal()
+            KeySender.wait()
+        }
     }
 
-    /// 垂直2分割: Cmd+Shift+D
-    private func executeVertical() {
-        KeySender.splitVertical()
+    /// グリッド分割（C列×R行）
+    /// 均等な列を作るため、左側を先に分割してから右に戻る戦略を使用
+    private func executeGrid(columns: Int, rows: Int) {
+        // Step 1: 均等な列を作成
+        createEqualColumns(count: columns)
+
+        // Step 2: 左端に移動
+        moveToLeftmost(columns: columns)
+
+        // Step 3: 各列を行に分割（左から右へ）
+        for col in 0..<columns {
+            // この列を行に分割
+            splitColumnIntoRows(rows: rows)
+
+            // 次の列へ移動（最後の列以外）
+            if col < columns - 1 {
+                KeySender.moveRight()
+                KeySender.wait()
+            }
+        }
     }
 
-    /// 4分割 (2x2)
-    /// 左を先に分割してから右に戻る（ナビゲーションの確実性のため）
-    /// 1. Cmd+D           → [左|右], カーソルは右
-    /// 2. Opt+H           → 左に移動（右がまだシンプルなペインのうちに）
-    /// 3. Cmd+Shift+D     → 左を下に分割
-    /// 4. Opt+L           → 右に移動（右はまだシンプルなペイン）
-    /// 5. Cmd+Shift+D     → 右を下に分割
-    private func executeGrid4() {
-        // [左 | 右] を作成
+    /// 均等な列を作成
+    /// 2のべき乗分割を活用して均等に近い列を作る
+    private func createEqualColumns(count: Int) {
+        guard count > 1 else { return }
+
+        // 最初の分割
         KeySender.splitHorizontal()
         KeySender.wait()
 
-        // すぐに左に移動（右を分割する前に）
+        if count == 2 {
+            return
+        }
+
+        // 3列以上: 左に移動してから分割を続ける
+        // これにより、シンプルなペインに対してナビゲーションできる
         KeySender.moveLeft()
         KeySender.wait()
 
-        // 左を上下に分割
-        KeySender.splitVertical()
-        KeySender.wait()
+        // 残りの列を作成
+        // 左側と右側を交互に分割して均等に近づける
+        var created = 2
+        var onLeft = true
 
-        // 右に移動（右はまだ分割されていないシンプルなペイン）
-        KeySender.moveRight()
-        KeySender.wait()
+        while created < count {
+            KeySender.splitHorizontal()
+            KeySender.wait()
+            created += 1
 
-        // 右を上下に分割
-        KeySender.splitVertical()
+            if created < count {
+                // 次の分割位置へ移動
+                if onLeft {
+                    // 右端へ移動
+                    for _ in 0..<(created - 1) {
+                        KeySender.moveRight()
+                        KeySender.wait()
+                    }
+                    onLeft = false
+                } else {
+                    // 左端へ移動
+                    for _ in 0..<(created - 1) {
+                        KeySender.moveLeft()
+                        KeySender.wait()
+                    }
+                    onLeft = true
+                }
+            }
+        }
     }
 
-    /// 6分割 (2x3) - 2列 x 3行
-    /// 左を先に分割してから右に戻る（ナビゲーションの確実性のため）
-    /// 各列は50%幅で均等、各行は50%-25%-25%（バイナリ分割の制約）
-    private func executeGrid6() {
-        // [左 | 右] を作成
-        KeySender.splitHorizontal()
-        KeySender.wait()
-
-        // すぐに左に移動（右を分割する前に）
-        KeySender.moveLeft()
-        KeySender.wait()
-
-        // 左列を3行に分割
-        KeySender.splitVertical()
-        KeySender.wait()
-
-        KeySender.splitVertical()
-        KeySender.wait()
-
-        // 右に移動（右はまだシンプルなペイン）
-        KeySender.moveRight()
-        KeySender.wait()
-
-        // 右列を3行に分割
-        KeySender.splitVertical()
-        KeySender.wait()
-
-        KeySender.splitVertical()
+    /// 左端の列に移動
+    private func moveToLeftmost(columns: Int) {
+        for _ in 0..<(columns - 1) {
+            KeySender.moveLeft()
+            KeySender.wait()
+        }
     }
 
-    /// 8分割 (4x2) - 4列 x 2行（各列25%幅で均等）
-    /// ナビゲーションの確実性のため、シンプルなペインを保ちながら分割
-    private func executeGrid8() {
-        // Step 1: [50% | 50%], カーソルは右
-        KeySender.splitHorizontal()
-        KeySender.wait()
+    /// 現在の列を行に分割
+    private func splitColumnIntoRows(rows: Int) {
+        for _ in 1..<rows {
+            KeySender.splitVertical()
+            KeySender.wait()
+        }
 
-        // Step 2: すぐに左に移動（両方がシンプルなペインのうちに）
-        KeySender.moveLeft()
-        KeySender.wait()
-
-        // Step 3: 左を分割 → [25% | 25% | 50%], カーソルは2番目
-        KeySender.splitHorizontal()
-        KeySender.wait()
-
-        // Step 4: 右端（50%）に移動（まだシンプルなペイン）
-        KeySender.moveRight()
-        KeySender.wait()
-
-        // Step 5: 右を分割 → [25% | 25% | 25% | 25%], カーソルは4番目
-        KeySender.splitHorizontal()
-        KeySender.wait()
-
-        // ここで4つの均等な列が完成
-        // 各列を上下に分割（右端から左へ）
-
-        // 4列目（現在位置）を上下分割
-        KeySender.splitVertical()
-        KeySender.wait()
-
-        // 3列目へ移動して上下分割
-        KeySender.moveLeft()
-        KeySender.wait()
-        KeySender.splitVertical()
-        KeySender.wait()
-
-        // 2列目へ移動して上下分割
-        KeySender.moveLeft()
-        KeySender.wait()
-        KeySender.splitVertical()
-        KeySender.wait()
-
-        // 1列目へ移動して上下分割
-        KeySender.moveLeft()
-        KeySender.wait()
-        KeySender.splitVertical()
+        // 分割後、一番上に戻る（次の列の分割のため）
+        if rows > 1 {
+            for _ in 1..<rows {
+                KeySender.moveUp()
+                KeySender.wait()
+            }
+        }
     }
+}
+
+/// 利用可能なレイアウトの一覧を取得
+func getAvailableLayouts() -> [(shortcut: String, description: String)] {
+    return [
+        ("h", "横2列 (2x1)"),
+        ("v", "縦2段 (1x2)"),
+        ("4", "4分割 (2x2)"),
+        ("6", "6分割 (2x3)"),
+        ("8", "8分割 (4x2)"),
+        ("9", "9分割 (3x3)"),
+        ("CxR", "任意のグリッド（例: 3x2, 2x4）"),
+    ]
 }
