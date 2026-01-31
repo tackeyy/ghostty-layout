@@ -2,6 +2,10 @@
 
 > CLI tool for splitting Ghostty terminal panes from the command line
 
+<p align="center">
+  <img src="assets/demo.gif" alt="ghostty-layout demo" width="600">
+</p>
+
 A command-line utility that creates window split layouts in [Ghostty](https://ghostty.org) terminal by automating keyboard shortcuts. Supports preset layouts and custom grid configurations.
 
 ## Features
