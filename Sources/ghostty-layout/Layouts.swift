@@ -117,11 +117,12 @@ struct GridLayout {
     }
 
     /// 均等な列を作成
-    /// 2のべき乗分割を活用して均等に近い列を作る
+    /// シンプルなペインに対してのみナビゲーションを行い、確実性を高める
     private func createEqualColumns(count: Int) {
         guard count > 1 else { return }
 
-        // 最初の分割
+        // 2列: 単純に分割
+        // [50% | 50%]
         KeySender.splitHorizontal()
         KeySender.wait()
 
@@ -129,39 +130,37 @@ struct GridLayout {
             return
         }
 
-        // 3列以上: 左に移動してから分割を続ける
-        // これにより、シンプルなペインに対してナビゲーションできる
+        // 3列以上: 左に移動してから左側を分割
+        // これにより右側がシンプルなペインのままになる
         KeySender.moveLeft()
+        KeySender.wait(150)  // 長めに待機
+
+        // 3列目: 左を分割 → [25% | 25% | 50%]
+        KeySender.splitHorizontal()
         KeySender.wait()
 
-        // 残りの列を作成
-        // 左側と右側を交互に分割して均等に近づける
-        var created = 2
-        var onLeft = true
+        if count == 3 {
+            return
+        }
 
-        while created < count {
+        // 4列: 右端（50%）を分割 → [25% | 25% | 25% | 25%]
+        // 右端に移動（2回）
+        KeySender.moveRight()
+        KeySender.wait(150)
+        KeySender.moveRight()
+        KeySender.wait(150)
+
+        KeySender.splitHorizontal()
+        KeySender.wait()
+
+        if count == 4 {
+            return
+        }
+
+        // 5列以上: 順次右端を分割していく
+        for _ in 5...count {
             KeySender.splitHorizontal()
             KeySender.wait()
-            created += 1
-
-            if created < count {
-                // 次の分割位置へ移動
-                if onLeft {
-                    // 右端へ移動
-                    for _ in 0..<(created - 1) {
-                        KeySender.moveRight()
-                        KeySender.wait()
-                    }
-                    onLeft = false
-                } else {
-                    // 左端へ移動
-                    for _ in 0..<(created - 1) {
-                        KeySender.moveLeft()
-                        KeySender.wait()
-                    }
-                    onLeft = true
-                }
-            }
         }
     }
 

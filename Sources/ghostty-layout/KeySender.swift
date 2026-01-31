@@ -4,6 +4,9 @@ import Carbon.HIToolbox
 /// キーストローク送信を担当
 struct KeySender {
 
+    /// プレフィックス送信後の待機時間（マイクロ秒）
+    private static let prefixWaitMicroseconds: UInt32 = 150_000
+
     /// 現在の設定（起動時にロード）
     static var config: Config = Config.defaultConfig
 
@@ -44,7 +47,7 @@ struct KeySender {
                 case "control", "ctrl":
                     result.insert(.control)
                 default:
-                    break
+                    print("警告: 不明な修飾キー '\(str)'")
                 }
             }
             return result
@@ -82,7 +85,7 @@ struct KeySender {
     private static func sendPrefixIfNeeded() {
         guard let prefix = config.prefix else { return }
         send(binding: prefix)
-        usleep(50_000) // 50ms wait for prefix to register
+        usleep(prefixWaitMicroseconds)
     }
 
     /// 水平分割（右に新しいペイン）
@@ -123,13 +126,16 @@ struct KeySender {
 
     /// 全ペインを均等化
     static func equalizeSplits() {
-        guard let binding = config.equalizeSplits else { return }
+        // 設定がない場合はデフォルトのキーバインドを使用
+        let binding = config.equalizeSplits ?? KeyBinding(key: "=", modifiers: ["command", "control"])
         sendPrefixIfNeeded()
         send(binding: binding)
     }
 
     /// 操作間の待機（ミリ秒）
     static func wait(_ milliseconds: UInt32 = 100) {
-        usleep(milliseconds * 1000)
+        // オーバーフロー対策: UInt32.max / 1000 = 4,294,967
+        let safeMicroseconds = milliseconds <= 4_294_967 ? milliseconds * 1000 : UInt32.max
+        usleep(safeMicroseconds)
     }
 }

@@ -54,6 +54,17 @@ struct Config: Codable {
             return nil
         }
 
+        // symlink チェック（セキュリティ対策）
+        do {
+            let resourceValues = try configPath.resourceValues(forKeys: [.isSymbolicLinkKey])
+            if resourceValues.isSymbolicLink == true {
+                print("警告: 設定ファイルがシンボリックリンクのためスキップしました: \(configPath.path)")
+                return nil
+            }
+        } catch {
+            return nil
+        }
+
         do {
             let data = try Data(contentsOf: configPath)
             let decoder = JSONDecoder()
