@@ -1,0 +1,28 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: swift build -c release --arch arm64 --arch x86_64
+
+      - name: Get version
+        id: version
+        run: echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: ${{ steps.version.outputs.version }}
+          draft: false
+          prerelease: false
+          files: .build/apple/Products/Release/ghostty-layout
+          generate_release_notes: true
