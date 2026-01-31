@@ -126,10 +126,15 @@ struct KeySender {
 
     /// 全ペインを均等化
     static func equalizeSplits() {
-        // 設定がない場合はデフォルトのキーバインドを使用
-        let binding = config.equalizeSplits ?? KeyBinding(key: "=", modifiers: ["command", "control"])
-        sendPrefixIfNeeded()
-        send(binding: binding)
+        if let binding = config.equalizeSplits {
+            // Ghostty設定から読み取ったキーバインドを使用（prefix を送信）
+            sendPrefixIfNeeded()
+            send(binding: binding)
+        } else {
+            // デフォルトのキーバインドを使用（prefix なし、Ghosttyのデフォルト）
+            let defaultBinding = KeyBinding(key: "=", modifiers: ["command", "control"])
+            send(binding: defaultBinding)
+        }
     }
 
     /// 操作間の待機（ミリ秒）

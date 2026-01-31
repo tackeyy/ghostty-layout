@@ -119,7 +119,7 @@ struct GhosttyConfigParser {
             return parseKeyBinding(keyPart) ?? defaultBinding
         }
 
-        // equalize_splitsのバインドを取得（オプショナル）
+        // equalize_splitsのバインドを取得（Ghostty設定にある場合のみ）
         let equalizeSplitsBinding: KeyBinding?
         if let keys = keybindings["equalize_splits"] {
             let keyPart: String
@@ -128,9 +128,10 @@ struct GhosttyConfigParser {
             } else {
                 keyPart = keys
             }
-            equalizeSplitsBinding = parseKeyBinding(keyPart) ?? Config.defaultConfig.equalizeSplits
+            equalizeSplitsBinding = parseKeyBinding(keyPart)
         } else {
-            equalizeSplitsBinding = Config.defaultConfig.equalizeSplits
+            // Ghostty設定にない場合は nil（デフォルト値は使用しない）
+            equalizeSplitsBinding = nil
         }
 
         return Config(
