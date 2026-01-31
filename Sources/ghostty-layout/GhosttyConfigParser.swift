@@ -19,14 +19,12 @@ struct GhosttyConfigParser {
             return nil
         }
 
-        // symlink チェック（セキュリティ対策）
-        do {
-            let resourceValues = try configPath.resourceValues(forKeys: [.isSymbolicLinkKey])
-            if resourceValues.isSymbolicLink == true {
-                print("警告: 設定ファイルがシンボリックリンクのためスキップしました: \(configPath.path)")
-                return nil
+        // ファイル検証（symlink + パーミッション）
+        let validation = FileHelper.validateFileForReading(configPath)
+        if !validation.isValid {
+            if let warning = validation.warning {
+                print("警告: \(warning)")
             }
-        } catch {
             return nil
         }
 

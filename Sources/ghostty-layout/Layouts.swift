@@ -5,6 +5,11 @@ struct GridLayout {
     let columns: Int
     let rows: Int
 
+    /// グリッドサイズの最小値
+    private static let minGridSize = 1
+    /// グリッドサイズの最大値（パフォーマンスとユーザビリティのため）
+    private static let maxGridSize = 8
+
     /// 文字列からパース（例: "2x3", "3x2"）
     static func parse(_ input: String) -> GridLayout? {
         // グリッド記法: CxR
@@ -12,8 +17,8 @@ struct GridLayout {
         if parts.count == 2,
            let cols = Int(parts[0]),
            let rows = Int(parts[1]),
-           cols >= 1 && cols <= 8,
-           rows >= 1 && rows <= 8 {
+           cols >= minGridSize && cols <= maxGridSize,
+           rows >= minGridSize && rows <= maxGridSize {
             return GridLayout(columns: cols, rows: rows)
         }
 

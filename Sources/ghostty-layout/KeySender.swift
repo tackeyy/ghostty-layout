@@ -137,10 +137,13 @@ struct KeySender {
         }
     }
 
+    /// usleep の最大安全値（ミリ秒）: UInt32.max / 1000
+    private static let maxSafeWaitMilliseconds: UInt32 = 4_294_967
+
     /// 操作間の待機（ミリ秒）
     static func wait(_ milliseconds: UInt32 = 100) {
-        // オーバーフロー対策: UInt32.max / 1000 = 4,294,967
-        let safeMicroseconds = milliseconds <= 4_294_967 ? milliseconds * 1000 : UInt32.max
+        let safeMicroseconds = milliseconds <= maxSafeWaitMilliseconds ?
+                               milliseconds * 1000 : UInt32.max
         usleep(safeMicroseconds)
     }
 }
