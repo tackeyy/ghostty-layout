@@ -23,11 +23,23 @@ struct GhosttyLayoutCommand: ParsableCommand {
     @Flag(name: .long, help: "現在の設定を表示")
     var showConfig: Bool = false
 
+    @Flag(name: .long, help: "Ghosttyの設定を再解析して設定ファイルを同期")
+    var syncConfig: Bool = false
+
     func run() throws {
         // 設定ファイルの再生成
         if initConfig {
             try regenerateConfig()
             return
+        }
+
+        // 設定ファイルの同期
+        if syncConfig {
+            try syncConfigFromGhostty()
+            // レイアウト引数があれば続行、なければ終了
+            if layout == nil {
+                return
+            }
         }
 
         // 設定を表示
@@ -105,6 +117,24 @@ struct GhosttyLayoutCommand: ParsableCommand {
         printConfigSummary(config)
     }
 
+    /// Ghosttyの設定を再解析して設定ファイルを同期
+    private func syncConfigFromGhostty() throws {
+        // Ghosttyの設定を解析
+        let ghosttyConfig = GhosttyConfigParser.parse()
+        let config = ghosttyConfig ?? Config.defaultConfig
+
+        // 設定を保存（既存ファイルを上書き）
+        try config.save()
+
+        if ghosttyConfig != nil {
+            print("Ghosttyの設定から設定ファイルを同期しました: \(Config.configPath.path)")
+        } else {
+            print("Ghosttyの設定が見つからないため、デフォルト設定で同期しました: \(Config.configPath.path)")
+        }
+        print("")
+        printConfigSummary(config)
+    }
+
     /// 現在の設定を表示
     private func showCurrentConfig() {
         let config = Config.loadOrCreate()
@@ -125,6 +155,9 @@ struct GhosttyLayoutCommand: ParsableCommand {
         print("  右に移動:      \(formatBindingWithPrefix(config.gotoRight, prefix: config.prefix))")
         print("  上に移動:      \(formatBindingWithPrefix(config.gotoUp, prefix: config.prefix))")
         print("  下に移動:      \(formatBindingWithPrefix(config.gotoDown, prefix: config.prefix))")
+        if let equalize = config.equalizeSplits {
+            print("  分割均等化:    \(formatBindingWithPrefix(equalize, prefix: config.prefix))")
+        }
     }
 
     /// キーバインドを文字列にフォーマット
@@ -167,5 +200,7 @@ struct GhosttyLayoutCommand: ParsableCommand {
         print("  ghostty-layout --list")
         print("  ghostty-layout --show-config")
         print("  ghostty-layout --init-config")
+        print("  ghostty-layout --sync-config")
+        print("  ghostty-layout --sync-config 3x2")
     }
 }

@@ -119,6 +119,20 @@ struct GhosttyConfigParser {
             return parseKeyBinding(keyPart) ?? defaultBinding
         }
 
+        // equalize_splitsのバインドを取得（オプショナル）
+        let equalizeSplitsBinding: KeyBinding?
+        if let keys = keybindings["equalize_splits"] {
+            let keyPart: String
+            if hasPrefix, let afterPrefix = keys.components(separatedBy: ">").last {
+                keyPart = afterPrefix.trimmingCharacters(in: .whitespaces)
+            } else {
+                keyPart = keys
+            }
+            equalizeSplitsBinding = parseKeyBinding(keyPart) ?? Config.defaultConfig.equalizeSplits
+        } else {
+            equalizeSplitsBinding = Config.defaultConfig.equalizeSplits
+        }
+
         return Config(
             prefix: prefix,
             splitRight: getBinding(for: "new_split:right", defaultBinding: Config.defaultConfig.splitRight),
@@ -126,7 +140,8 @@ struct GhosttyConfigParser {
             gotoLeft: getBinding(for: "goto_split:left", defaultBinding: Config.defaultConfig.gotoLeft),
             gotoRight: getBinding(for: "goto_split:right", defaultBinding: Config.defaultConfig.gotoRight),
             gotoUp: getBinding(for: "goto_split:up", defaultBinding: Config.defaultConfig.gotoUp),
-            gotoDown: getBinding(for: "goto_split:down", defaultBinding: Config.defaultConfig.gotoDown)
+            gotoDown: getBinding(for: "goto_split:down", defaultBinding: Config.defaultConfig.gotoDown),
+            equalizeSplits: equalizeSplitsBinding
         )
     }
 
