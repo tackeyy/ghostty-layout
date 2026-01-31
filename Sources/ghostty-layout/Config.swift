@@ -20,6 +20,7 @@ struct Config: Codable {
     var gotoRight: KeyBinding
     var gotoUp: KeyBinding
     var gotoDown: KeyBinding
+    var equalizeSplits: KeyBinding?
 
     /// デフォルト設定（Ghosttyのデフォルトキーバインド）
     static let defaultConfig = Config(
@@ -29,7 +30,8 @@ struct Config: Codable {
         gotoLeft: KeyBinding(key: "left", modifiers: ["command", "control"]),
         gotoRight: KeyBinding(key: "right", modifiers: ["command", "control"]),
         gotoUp: KeyBinding(key: "up", modifiers: ["command", "control"]),
-        gotoDown: KeyBinding(key: "down", modifiers: ["command", "control"])
+        gotoDown: KeyBinding(key: "down", modifiers: ["command", "control"]),
+        equalizeSplits: KeyBinding(key: "=", modifiers: ["command", "control"])
     )
 
     /// 設定ファイルのパス

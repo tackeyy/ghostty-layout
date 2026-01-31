@@ -79,6 +79,7 @@ struct GridLayout {
             KeySender.splitVertical()
             KeySender.wait()
         }
+        KeySender.equalizeSplits()
     }
 
     /// 横のみの分割（N列×1行）
@@ -87,6 +88,7 @@ struct GridLayout {
             KeySender.splitHorizontal()
             KeySender.wait()
         }
+        KeySender.equalizeSplits()
     }
 
     /// グリッド分割（C列×R行）
@@ -109,6 +111,9 @@ struct GridLayout {
                 KeySender.wait()
             }
         }
+
+        // Step 4: 全ペインを均等化
+        KeySender.equalizeSplits()
     }
 
     /// 均等な列を作成

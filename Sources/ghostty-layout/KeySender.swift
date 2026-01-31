@@ -121,6 +121,13 @@ struct KeySender {
         send(binding: config.gotoUp)
     }
 
+    /// 全ペインを均等化
+    static func equalizeSplits() {
+        guard let binding = config.equalizeSplits else { return }
+        sendPrefixIfNeeded()
+        send(binding: binding)
+    }
+
     /// 操作間の待機（ミリ秒）
     static func wait(_ milliseconds: UInt32 = 100) {
         usleep(milliseconds * 1000)
