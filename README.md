@@ -15,6 +15,11 @@ A command-line utility that creates window split layouts in [Ghostty](https://gh
 - **Auto-detection**: Reads keybindings from your Ghostty config (including prefix keys)
 - **Equalize splits**: Automatically equalizes pane sizes after layout creation
 
+## Requirements
+
+- macOS 13 (Ventura) or later
+- Swift 5.9+ (for building from source)
+
 ## Installation
 
 ### From Source
@@ -210,6 +215,27 @@ Create multiple scripts for different layouts:
 
 /usr/local/bin/ghostty-layout 2x3
 ```
+
+## Development
+
+```bash
+# Build
+swift build
+
+# Run tests
+swift test
+
+# Build for release
+swift build -c release
+```
+
+## Contributing
+
+Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) before submitting a pull request.
+
+- [Contributing Guide](CONTRIBUTING.md)
+- [Testing Guide](docs/TESTING.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
 
 ## License
 
