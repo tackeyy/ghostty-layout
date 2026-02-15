@@ -1,10 +1,10 @@
 import Foundation
 
 /// ファイル操作のヘルパー
-enum FileHelper {
+public enum FileHelper {
     /// ファイルがシンボリックリンクかどうかをチェック
     /// - Returns: symlink の場合は true、それ以外は false
-    static func isSymbolicLink(_ url: URL) -> Bool {
+    public static func isSymbolicLink(_ url: URL) -> Bool {
         do {
             let resourceValues = try url.resourceValues(forKeys: [.isSymbolicLinkKey])
             return resourceValues.isSymbolicLink == true
@@ -14,7 +14,7 @@ enum FileHelper {
     }
 
     /// ファイルのパーミッションが安全かどうかをチェック（所有者のみ読み書き可能）
-    static func hasSecurePermissions(_ url: URL) -> Bool {
+    public static func hasSecurePermissions(_ url: URL) -> Bool {
         let fileManager = FileManager.default
         guard let attributes = try? fileManager.attributesOfItem(atPath: url.path),
               let permissions = attributes[.posixPermissions] as? Int else {
@@ -26,7 +26,7 @@ enum FileHelper {
 
     /// ファイルを安全に読み込む（symlink チェック + パーミッションチェック）
     /// - Returns: ファイルが安全でない場合は nil と警告メッセージ
-    static func validateFileForReading(_ url: URL) -> (isValid: Bool, warning: String?) {
+    public static func validateFileForReading(_ url: URL) -> (isValid: Bool, warning: String?) {
         // symlink チェック
         if isSymbolicLink(url) {
             return (false, "設定ファイルがシンボリックリンクのためスキップしました: \(url.path)")

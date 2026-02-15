@@ -1,5 +1,6 @@
 import ArgumentParser
 import Foundation
+import GhosttyLayoutLib
 
 @main
 struct GhosttyLayoutCommand: ParsableCommand {

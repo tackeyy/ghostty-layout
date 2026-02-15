@@ -1,10 +1,10 @@
 import Foundation
 
 /// Ghosttyの設定ファイルを解析
-struct GhosttyConfigParser {
+public struct GhosttyConfigParser {
 
     /// Ghosttyの設定ファイルパス候補
-    static var configPaths: [URL] {
+    public static var configPaths: [URL] {
         let home = FileManager.default.homeDirectoryForCurrentUser
         return [
             home.appendingPathComponent(".config/ghostty/config"),
@@ -13,7 +13,7 @@ struct GhosttyConfigParser {
     }
 
     /// Ghosttyの設定を解析してConfigを生成
-    static func parse() -> Config? {
+    public static func parse() -> Config? {
         // 設定ファイルを探す
         guard let configPath = configPaths.first(where: { FileManager.default.fileExists(atPath: $0.path) }) else {
             return nil
@@ -36,7 +36,7 @@ struct GhosttyConfigParser {
     }
 
     /// 設定ファイルの内容を解析
-    static func parseContent(_ content: String) -> Config? {
+    public static func parseContent(_ content: String) -> Config? {
         var keybindings: [String: String] = [:]
 
         // keybind = ... の行を解析

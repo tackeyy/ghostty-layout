@@ -1,29 +1,40 @@
 import Foundation
 
 /// キーバインド設定
-struct KeyBinding: Codable {
-    let key: String
-    let modifiers: [String]
+public struct KeyBinding: Codable {
+    public let key: String
+    public let modifiers: [String]
 
-    init(key: String, modifiers: [String] = []) {
+    public init(key: String, modifiers: [String] = []) {
         self.key = key
         self.modifiers = modifiers
     }
 }
 
 /// ghostty-layout の設定
-struct Config: Codable {
-    var prefix: KeyBinding?
-    var splitRight: KeyBinding
-    var splitDown: KeyBinding
-    var gotoLeft: KeyBinding
-    var gotoRight: KeyBinding
-    var gotoUp: KeyBinding
-    var gotoDown: KeyBinding
-    var equalizeSplits: KeyBinding?
+public struct Config: Codable {
+    public var prefix: KeyBinding?
+    public var splitRight: KeyBinding
+    public var splitDown: KeyBinding
+    public var gotoLeft: KeyBinding
+    public var gotoRight: KeyBinding
+    public var gotoUp: KeyBinding
+    public var gotoDown: KeyBinding
+    public var equalizeSplits: KeyBinding?
+
+    public init(prefix: KeyBinding? = nil, splitRight: KeyBinding, splitDown: KeyBinding, gotoLeft: KeyBinding, gotoRight: KeyBinding, gotoUp: KeyBinding, gotoDown: KeyBinding, equalizeSplits: KeyBinding? = nil) {
+        self.prefix = prefix
+        self.splitRight = splitRight
+        self.splitDown = splitDown
+        self.gotoLeft = gotoLeft
+        self.gotoRight = gotoRight
+        self.gotoUp = gotoUp
+        self.gotoDown = gotoDown
+        self.equalizeSplits = equalizeSplits
+    }
 
     /// デフォルト設定（Ghosttyのデフォルトキーバインド）
-    static let defaultConfig = Config(
+    public static let defaultConfig = Config(
         prefix: nil,
         splitRight: KeyBinding(key: "d", modifiers: ["command"]),
         splitDown: KeyBinding(key: "d", modifiers: ["command", "shift"]),
@@ -35,7 +46,7 @@ struct Config: Codable {
     )
 
     /// 設定ファイルのパス
-    static var configPath: URL {
+    public static var configPath: URL {
         let configDir = FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent(".config")
             .appendingPathComponent("ghostty-layout")
@@ -43,13 +54,13 @@ struct Config: Codable {
     }
 
     /// 設定ディレクトリを作成
-    static func ensureConfigDirectory() throws {
+    public static func ensureConfigDirectory() throws {
         let configDir = configPath.deletingLastPathComponent()
         try FileManager.default.createDirectory(at: configDir, withIntermediateDirectories: true)
     }
 
     /// 設定を読み込む
-    static func load() -> Config? {
+    public static func load() -> Config? {
         guard FileManager.default.fileExists(atPath: configPath.path) else {
             return nil
         }
@@ -74,7 +85,7 @@ struct Config: Codable {
     }
 
     /// 設定を保存
-    func save() throws {
+    public func save() throws {
         try Config.ensureConfigDirectory()
 
         let encoder = JSONEncoder()
@@ -84,7 +95,7 @@ struct Config: Codable {
     }
 
     /// 設定をロードまたは生成
-    static func loadOrCreate() -> Config {
+    public static func loadOrCreate() -> Config {
         // 既存の設定があれば読み込む
         if let existing = load() {
             return existing

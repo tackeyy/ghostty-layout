@@ -1,14 +1,40 @@
 import AppKit
 import Carbon.HIToolbox
 
+/// キー操作のプロトコル（テスト時のモック化に使用）
+public protocol KeySending {
+    func splitHorizontal()
+    func splitVertical()
+    func moveLeft()
+    func moveRight()
+    func moveUp()
+    func moveDown()
+    func equalizeSplits()
+    func wait(_ milliseconds: UInt32)
+}
+
+/// KeySender のstaticメソッドをプロトコルに橋渡しするアダプタ
+public struct KeySenderAdapter: KeySending {
+    public init() {}
+
+    public func splitHorizontal() { KeySender.splitHorizontal() }
+    public func splitVertical() { KeySender.splitVertical() }
+    public func moveLeft() { KeySender.moveLeft() }
+    public func moveRight() { KeySender.moveRight() }
+    public func moveUp() { KeySender.moveUp() }
+    public func moveDown() { KeySender.moveDown() }
+    public func equalizeSplits() { KeySender.equalizeSplits() }
+    public func wait(_ milliseconds: UInt32) { KeySender.wait(milliseconds) }
+}
+
 /// キーストローク送信を担当
-struct KeySender {
+public struct KeySender {
 
     /// プレフィックス送信後の待機時間（マイクロ秒）
     private static let prefixWaitMicroseconds: UInt32 = 150_000
 
     /// 現在の設定（起動時にロード）
-    static var config: Config = Config.defaultConfig
+    public static var config: Config = Config.defaultConfig
 
     /// キーコードのマッピング
     private static let keyCodeMap: [String: UInt16] = [
@@ -25,16 +51,20 @@ struct KeySender {
     ]
 
     /// 修飾キー
-    struct Modifiers: OptionSet {
-        let rawValue: CGEventFlags.RawValue
+    public struct Modifiers: OptionSet {
+        public let rawValue: CGEventFlags.RawValue
 
-        static let command = Modifiers(rawValue: CGEventFlags.maskCommand.rawValue)
-        static let shift = Modifiers(rawValue: CGEventFlags.maskShift.rawValue)
-        static let option = Modifiers(rawValue: CGEventFlags.maskAlternate.rawValue)
-        static let control = Modifiers(rawValue: CGEventFlags.maskControl.rawValue)
+        public init(rawValue: CGEventFlags.RawValue) {
+            self.rawValue = rawValue
+        }
+
+        public static let command = Modifiers(rawValue: CGEventFlags.maskCommand.rawValue)
+        public static let shift = Modifiers(rawValue: CGEventFlags.maskShift.rawValue)
+        public static let option = Modifiers(rawValue: CGEventFlags.maskAlternate.rawValue)
+        public static let control = Modifiers(rawValue: CGEventFlags.maskControl.rawValue)
 
         /// 文字列配列からModifiersを生成
-        static func from(_ strings: [String]) -> Modifiers {
+        public static func from(_ strings: [String]) -> Modifiers {
             var result: Modifiers = []
             for str in strings {
                 switch str.lowercased() {
@@ -55,7 +85,7 @@ struct KeySender {
     }
 
     /// キーストロークを送信
-    static func send(keyCode: UInt16, modifiers: Modifiers = []) {
+    public static func send(keyCode: UInt16, modifiers: Modifiers = []) {
         let source = CGEventSource(stateID: .hidSystemState)
 
         // キーダウン
@@ -72,7 +102,7 @@ struct KeySender {
     }
 
     /// KeyBindingからキーストロークを送信
-    static func send(binding: KeyBinding) {
+    public static func send(binding: KeyBinding) {
         guard let keyCode = keyCodeMap[binding.key.lowercased()] else {
             print("警告: 不明なキー '\(binding.key)'")
             return
@@ -89,43 +119,43 @@ struct KeySender {
     }
 
     /// 水平分割（右に新しいペイン）
-    static func splitHorizontal() {
+    public static func splitHorizontal() {
         sendPrefixIfNeeded()
         send(binding: config.splitRight)
     }
 
     /// 垂直分割（下に新しいペイン）
-    static func splitVertical() {
+    public static func splitVertical() {
         sendPrefixIfNeeded()
         send(binding: config.splitDown)
     }
 
     /// 左のペインに移動
-    static func moveLeft() {
+    public static func moveLeft() {
         sendPrefixIfNeeded()
         send(binding: config.gotoLeft)
     }
 
     /// 右のペインに移動
-    static func moveRight() {
+    public static func moveRight() {
         sendPrefixIfNeeded()
         send(binding: config.gotoRight)
     }
 
     /// 下のペインに移動
-    static func moveDown() {
+    public static func moveDown() {
         sendPrefixIfNeeded()
         send(binding: config.gotoDown)
     }
 
     /// 上のペインに移動
-    static func moveUp() {
+    public static func moveUp() {
         sendPrefixIfNeeded()
         send(binding: config.gotoUp)
     }
 
     /// 全ペインを均等化
-    static func equalizeSplits() {
+    public static func equalizeSplits() {
         if let binding = config.equalizeSplits {
             // Ghostty設定から読み取ったキーバインドを使用（prefix を送信）
             sendPrefixIfNeeded()
@@ -141,7 +171,7 @@ struct KeySender {
     private static let maxSafeWaitMilliseconds: UInt32 = 4_294_967
 
     /// 操作間の待機（ミリ秒）
-    static func wait(_ milliseconds: UInt32 = 100) {
+    public static func wait(_ milliseconds: UInt32 = 100) {
         let safeMicroseconds = milliseconds <= maxSafeWaitMilliseconds ?
                                milliseconds * 1000 : UInt32.max
         usleep(safeMicroseconds)
