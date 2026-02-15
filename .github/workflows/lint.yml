@@ -1,0 +1,50 @@
+name: Lint & Test
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  swiftlint:
+    name: SwiftLint
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run SwiftLint
+        uses: norio-nomura/action-swiftlint@3.2.1
+
+  test:
+    name: Test
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Swift
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: '5.9'
+
+      - name: Run tests with coverage
+        run: swift test --enable-code-coverage
+
+      - name: Generate coverage report
+        run: |
+          xcrun llvm-cov export -format="lcov" \
+            .build/debug/ghostty-layoutPackageTests.xctest/Contents/MacOS/ghostty-layoutPackageTests \
+            -instr-profile .build/debug/codecov/default.profdata > coverage.lcov
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.lcov
+          fail_ci_if_error: false

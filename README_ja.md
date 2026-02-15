@@ -2,6 +2,9 @@
 
 > Ghosttyターミナルの画面分割をコマンドラインから実行するCLIツール
 
+[![Lint & Test](https://github.com/tackeyy/ghostty-layout/actions/workflows/lint.yml/badge.svg)](https://github.com/tackeyy/ghostty-layout/actions/workflows/lint.yml)
+[![codecov](https://codecov.io/gh/tackeyy/ghostty-layout/branch/main/graph/badge.svg)](https://codecov.io/gh/tackeyy/ghostty-layout)
+
 [Ghostty](https://ghostty.org)ターミナルのウィンドウ分割レイアウトをキーボードショートカットの自動化により作成するコマンドラインユーティリティです。プリセットレイアウトとカスタムグリッド設定をサポートしています。
 
 ## 特徴

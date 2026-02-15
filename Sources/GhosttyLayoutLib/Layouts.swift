@@ -208,6 +208,6 @@ public func getAvailableLayouts() -> [(shortcut: String, description: String)] {
         ("6", "6分割 (2x3)"),
         ("8", "8分割 (4x2)"),
         ("9", "9分割 (3x3)"),
-        ("CxR", "任意のグリッド（例: 3x2, 2x4）"),
+        ("CxR", "任意のグリッド（例: 3x2, 2x4）")
     ]
 }

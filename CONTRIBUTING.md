@@ -85,6 +85,23 @@ swift build -c release
 - Place public API in `Sources/GhosttyLayoutLib/`
 - Place the CLI entry point in `Sources/ghostty-layout/`
 
+### Code Linting
+
+ghostty-layout uses SwiftLint to enforce code style consistency.
+
+```bash
+# Install SwiftLint
+brew install swiftlint
+
+# Run SwiftLint
+swiftlint
+
+# Auto-fix issues (where possible)
+swiftlint --fix
+```
+
+Configuration is in `.swiftlint.yml`. All code must pass SwiftLint checks before merging.
+
 ### Commit Message Convention
 
 Format: `<type>: <subject>`
@@ -198,6 +215,7 @@ Before submitting, ensure:
 
 - All tests pass (`swift test`)
 - Build succeeds (`swift build`)
+- Code passes SwiftLint checks (`swiftlint`)
 - Code follows project style
 - Commit messages follow convention
 - Tests added for new functionality

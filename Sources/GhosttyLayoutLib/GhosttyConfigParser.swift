@@ -91,7 +91,7 @@ public struct GhosttyConfigParser {
         }
 
         // プレフィックスを検出（">" が含まれるキーバインドがあればプレフィックス形式）
-        var prefix: KeyBinding? = nil
+        var prefix: KeyBinding?
         var hasPrefix = false
 
         if let sampleKeys = keybindings.values.first(where: { $0.contains(">") }) {

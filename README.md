@@ -2,6 +2,9 @@
 
 > CLI tool for splitting Ghostty terminal panes from the command line
 
+[![Lint & Test](https://github.com/tackeyy/ghostty-layout/actions/workflows/lint.yml/badge.svg)](https://github.com/tackeyy/ghostty-layout/actions/workflows/lint.yml)
+[![codecov](https://codecov.io/gh/tackeyy/ghostty-layout/branch/main/graph/badge.svg)](https://codecov.io/gh/tackeyy/ghostty-layout)
+
 <p align="center">
   <img src="assets/demo.gif" alt="ghostty-layout demo" width="600">
 </p>
