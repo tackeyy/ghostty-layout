@@ -1,0 +1,30 @@
+name: Question
+description: Ask a question about using ghostty-layout
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have a question? We're here to help!
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+      description: What would you like to know about ghostty-layout?
+      placeholder: |
+        How do I configure custom keybindings?
+        What layout formats are supported?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Any additional context or what you've already tried
+      placeholder: |
+        I've tried... but I'm getting...
+        I looked at the documentation but...
+    validations:
+      required: false
